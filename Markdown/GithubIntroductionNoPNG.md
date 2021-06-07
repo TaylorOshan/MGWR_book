@@ -1,4 +1,3 @@
-
 # A Very Quick Introduction to Git/Github for Julia Users
 
 Julia's package system and Github are very closely intertwined:

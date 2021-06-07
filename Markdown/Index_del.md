@@ -1,4 +1,3 @@
-
 # <center> Multiscale Geographically Weighted Regression<br><br>UCGIS Symposium Workshop - 2020 <center>
 
 <center> Mehak Sachdeva </center>

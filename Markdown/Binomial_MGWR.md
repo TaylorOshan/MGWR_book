@@ -1,4 +1,3 @@
-
 # <center>Multiscale Geographically Weighted Regression - Binomial dependent variable</center>
 
 

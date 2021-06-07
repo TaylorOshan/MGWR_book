@@ -1,4 +1,3 @@
-
 **Notebook Outline:**  
   
 - [Setup with libraries](#Set-up-Cells)
@@ -247,7 +246,7 @@ bw_mgwpr = multi_bw(init=None,coords=coords,y=y_std, X=x_std, n=262, k=x.shape[1
 
     iters = 2
     opt_bws = [178.]
-    
+
 
 ##### Running without family and offset attributes runs the normal MGWR loop
 
@@ -258,7 +257,7 @@ bw_mgwr = multi_bw(init=None,coords=coords,y=y_std, X=x_std, n=262, k=x.shape[1]
 
     iters = 1
     opt_bws = [73.]
-    
+
 
 ### Parameter check
 

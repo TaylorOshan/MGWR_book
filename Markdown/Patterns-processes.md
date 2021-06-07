@@ -1,4 +1,3 @@
-
 # <center>Spatial Patterns and Spatial Processes</center>
 
 **Notebook Outline:**  

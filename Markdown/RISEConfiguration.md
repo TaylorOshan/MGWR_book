@@ -1,5 +1,3 @@
-
-
 ```python
 from traitlets.config.manager import BaseJSONConfigManager
 path = "/home/crackauc/.jupyter/nbconfig"

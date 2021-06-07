@@ -1,4 +1,3 @@
-
 **Notebook Outline:**  
   
 - [Setup with libraries](#Set-up-Cells)
@@ -108,7 +107,9 @@ plt.yticks([])
 
 
 
+    
 ![png](Simulated_data_example_Poisson-MGWR_files/Simulated_data_example_Poisson-MGWR_11_1.png)
+    
 
 
 
@@ -128,7 +129,9 @@ plt.yticks([])
 
 
 
+    
 ![png](Simulated_data_example_Poisson-MGWR_files/Simulated_data_example_Poisson-MGWR_12_1.png)
+    
 
 
 
@@ -148,7 +151,9 @@ plt.yticks([])
 
 
 
+    
 ![png](Simulated_data_example_Poisson-MGWR_files/Simulated_data_example_Poisson-MGWR_13_1.png)
+    
 
 
 
@@ -170,7 +175,9 @@ plt.tight_layout()
 ```
 
 
+    
 ![png](Simulated_data_example_Poisson-MGWR_files/Simulated_data_example_Poisson-MGWR_15_0.png)
+    
 
 
 
@@ -186,7 +193,9 @@ sns.distplot(B2)
 
 
 
+    
 ![png](Simulated_data_example_Poisson-MGWR_files/Simulated_data_example_Poisson-MGWR_16_1.png)
+    
 
 
 
@@ -255,7 +264,9 @@ sns.distplot(y)
 
 
 
+    
 ![png](Simulated_data_example_Poisson-MGWR_files/Simulated_data_example_Poisson-MGWR_24_1.png)
+    
 
 
 
@@ -271,7 +282,9 @@ sns.distplot(y_new)
 
 
 
+    
 ![png](Simulated_data_example_Poisson-MGWR_files/Simulated_data_example_Poisson-MGWR_25_1.png)
+    
 
 
 
@@ -315,7 +328,7 @@ selector.search(verbose=True)
 
     Current iteration: 1 ,SOC: 0.0
     Bandwidths: 43.0
-    
+
 
 
 
@@ -334,7 +347,7 @@ mgwr_model=MGWR(coords,y,x,selector,family=Poisson(),offset=None,constant=False)
 
 
     
-    
+
 
 #### Bandwidth: Random initialization check
 
@@ -347,7 +360,7 @@ selector.search(verbose=True,init_multi=600)
     Bandwidths: 43.0
     Current iteration: 2 ,SOC: 0.0
     Bandwidths: 43.0
-    
+
 
 
 
@@ -429,7 +442,7 @@ selector.search(verbose=True)
     Bandwidths: 400.0, 48.0, 44.0
     Current iteration: 5 ,SOC: 6.6e-06
     Bandwidths: 400.0, 48.0, 44.0
-    
+
 
 
 
@@ -455,7 +468,7 @@ mgwr_model=MGWR(coords,y,X,selector,family=Poisson(),offset=None).fit()
 
 
     
-    
+
 
 #### Parameters check
 
@@ -525,7 +538,7 @@ print(poisson_res.summary())
     x1             1.2009      0.019     62.905      0.000       1.163       1.238
     x2             1.1628      0.021     54.264      0.000       1.121       1.205
     ==============================================================================
-    
+
 
 
 ```python
@@ -545,7 +558,7 @@ selector.search(verbose=True,multi_bw_min=[625,625,625], multi_bw_max=[625,625,6
     Bandwidths: 625.0, 625.0, 625.0
     Current iteration: 4 ,SOC: 4.2e-06
     Bandwidths: 625.0, 625.0, 625.0
-    
+
 
 
 
@@ -564,7 +577,7 @@ mgwr_model=MGWR(coords,y,X,selector,family=Poisson(),offset=None).fit()
 
 
     
-    
+
 
 
 ```python

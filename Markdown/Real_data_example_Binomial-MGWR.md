@@ -1,4 +1,3 @@
-
 **Notebook Outline:**  
   
 - [Setup with libraries](#Set-up-Cells)
@@ -218,7 +217,7 @@ selector.search(verbose=True)
     Bandwidths: 184.0
     Current iteration: 4 ,SOC: 1e-06
     Bandwidths: 184.0
-    
+
 
 
 
@@ -237,7 +236,7 @@ mgwr_mod = MGWR(coords, y,x_std,selector,family=Binomial(),constant=False).fit()
 
 
     
-    
+
 
 #### Parameter check
 
@@ -299,7 +298,7 @@ selector.search(verbose=True)
     Bandwidths: 43.0, 106.0, 210.0, 100.0, 184.0
     Current iteration: 5 ,SOC: 5.3e-06
     Bandwidths: 43.0, 106.0, 210.0, 100.0, 184.0
-    
+
 
 
 
@@ -318,7 +317,7 @@ mgwr_mod = MGWR(coords, y,X_std,selector,family=Binomial(),constant=True).fit()
 
 
     
-    
+
 
 #### AIC, AICc, BIC check
 
@@ -354,7 +353,7 @@ selector.search(verbose=True,multi_bw_min=[239,239,239,239,239], multi_bw_max=[2
     Bandwidths: 239.0, 239.0, 239.0, 239.0, 239.0
     Current iteration: 6 ,SOC: 1.2e-06
     Bandwidths: 239.0, 239.0, 239.0, 239.0, 239.0
-    
+
 
 
 
@@ -373,7 +372,7 @@ mgwr_mod = MGWR(coords, y,X_std,selector,family=Binomial(),constant=True).fit()
 
 
     
-    
+
 
 
 ```python
@@ -432,7 +431,7 @@ gwr_mod.summary()
     X4                       -0.331      0.247     -1.118     -0.287      0.096
     ===========================================================================
     
-    
+
 
 
 ```python

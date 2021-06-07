@@ -1,4 +1,3 @@
-
 https://github.com/pysal/mgwr/pull/56
 
 
@@ -322,7 +321,9 @@ sns.distplot(predy)
 
 
 
+    
 ![png](Binomial_MGWR_approaches_tried_files/Binomial_MGWR_approaches_tried_20_1.png)
+    
 
 
 
@@ -350,7 +351,9 @@ sns.distplot(gwbr_model.y)
 
 
 
+    
 ![png](Binomial_MGWR_approaches_tried_files/Binomial_MGWR_approaches_tried_22_1.png)
+    
 
 
 #### Multi_bw changes
@@ -508,7 +511,7 @@ mgwbr = multi_bw(init=None,coords=coords,y=y, X=x_std, n=239, k=x.shape[1], fami
     iters = 2
     opt_bws = [82.]
     100.0
-    
+
 
 
 ```python
@@ -533,5 +536,7 @@ sns.distplot(predy)
 
 
 
+    
 ![png](Binomial_MGWR_approaches_tried_files/Binomial_MGWR_approaches_tried_28_1.png)
+    
 

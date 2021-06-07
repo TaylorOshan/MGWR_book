@@ -1,44 +1,30 @@
-
-% Default to the notebook output style
-
-    
-
-
-% Inherit from the specified cell style.
-
-
-
-
-    
 \documentclass[11pt]{article}
 
+    \usepackage[breakable]{tcolorbox}
+    \usepackage{parskip} % Stop auto-indenting (to mimic markdown behaviour)
     
-    
-    \usepackage[T1]{fontenc}
-    % Nicer default font (+ math font) than Computer Modern for most use cases
-    \usepackage{mathpazo}
+    \usepackage{iftex}
+    \ifPDFTeX
+    	\usepackage[T1]{fontenc}
+    	\usepackage{mathpazo}
+    \else
+    	\usepackage{fontspec}
+    \fi
 
     % Basic figure setup, for now with no caption control since it's done
     % automatically by Pandoc (which extracts ![](path) syntax from Markdown).
     \usepackage{graphicx}
-    % We will generate all images so they have a width \maxwidth. This means
-    % that they will get their normal width if they fit onto the page, but
-    % are scaled down if they would overflow the margins.
-    \makeatletter
-    \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth
-    \else\Gin@nat@width\fi}
-    \makeatother
+    % Maintain compatibility with old templates. Remove in nbconvert 6.0
     \let\Oldincludegraphics\includegraphics
-    % Set max figure width to be 80% of text width, for now hardcoded.
-    \renewcommand{\includegraphics}[1]{\Oldincludegraphics[width=.8\maxwidth]{#1}}
     % Ensure that by default, figures have no caption (until we provide a
     % proper Figure object with a Caption API and a way to capture that
     % in the conversion process - todo).
     \usepackage{caption}
-    \DeclareCaptionLabelFormat{nolabel}{}
-    \captionsetup{labelformat=nolabel}
+    \DeclareCaptionFormat{nocaption}{}
+    \captionsetup{format=nocaption,aboveskip=0pt,belowskip=0pt}
 
-    \usepackage{adjustbox} % Used to constrain images to a maximum size 
+    \usepackage{float}
+    \floatplacement{figure}{H} % forces figures to be placed at the correct location
     \usepackage{xcolor} % Allow colors to be defined
     \usepackage{enumerate} % Needed for markdown enumerations to work
     \usepackage{geometry} % Used to adjust the document margins
@@ -52,14 +38,32 @@
     \usepackage{upquote} % Upright quotes for verbatim code
     \usepackage{eurosym} % defines \euro
     \usepackage[mathletters]{ucs} % Extended unicode (utf-8) support
-    \usepackage[utf8x]{inputenc} % Allow utf-8 characters in the tex document
     \usepackage{fancyvrb} % verbatim replacement that allows latex
     \usepackage{grffile} % extends the file name processing of package graphics 
-                         % to support a larger range 
+                         % to support a larger range
+    \makeatletter % fix for old versions of grffile with XeLaTeX
+    \@ifpackagelater{grffile}{2019/11/01}
+    {
+      % Do nothing on new versions
+    }
+    {
+      \def\Gread@@xetex#1{%
+        \IfFileExists{"\Gin@base".bb}%
+        {\Gread@eps{\Gin@base.bb}}%
+        {\Gread@@xetex@aux#1}%
+      }
+    }
+    \makeatother
+    \usepackage[Export]{adjustbox} % Used to constrain images to a maximum size
+    \adjustboxset{max size={0.9\linewidth}{0.9\paperheight}}
+
     % The hyperref package gives us a pdf with properly built
     % internal navigation ('pdf bookmarks' for the table of contents,
     % internal cross-reference links, web links for URLs, etc.)
     \usepackage{hyperref}
+    % The default LaTeX title has an obnoxious amount of whitespace. By default,
+    % titling removes some of it. It also provides customization options.
+    \usepackage{titling}
     \usepackage{longtable} % longtable support required by pandoc >1.10
     \usepackage{booktabs}  % table support for pandoc > 1.12.2
     \usepackage[inline]{enumitem} % IRkernel/repr support (it uses the enumerate* environment)
@@ -68,7 +72,6 @@
     \usepackage{mathrsfs}
     
 
-    
     
     % Colors for the hyperref package
     \definecolor{urlcolor}{rgb}{0,.145,.698}
@@ -94,6 +97,9 @@
     \definecolor{ansi-white-intense}{HTML}{A1A6B2}
     \definecolor{ansi-default-inverse-fg}{HTML}{FFFFFF}
     \definecolor{ansi-default-inverse-bg}{HTML}{000000}
+
+    % common color for the border for error outputs.
+    \definecolor{outerrorbackground}{HTML}{FFDFDF}
 
     % commands and environments needed by pandoc snippets
     % extracted from the output of `pandoc -s`
@@ -155,9 +161,7 @@
     
     
     
-
-    % Pygments definitions
-    
+% Pygments definitions
 \makeatletter
 \def\PY@reset{\let\PY@it=\relax \let\PY@bf=\relax%
     \let\PY@ul=\relax \let\PY@tc=\relax%
@@ -259,11 +263,97 @@
 \makeatother
 
 
+    % For linebreaks inside Verbatim environment from package fancyvrb. 
+    \makeatletter
+        \newbox\Wrappedcontinuationbox 
+        \newbox\Wrappedvisiblespacebox 
+        \newcommand*\Wrappedvisiblespace {\textcolor{red}{\textvisiblespace}} 
+        \newcommand*\Wrappedcontinuationsymbol {\textcolor{red}{\llap{\tiny$\m@th\hookrightarrow$}}} 
+        \newcommand*\Wrappedcontinuationindent {3ex } 
+        \newcommand*\Wrappedafterbreak {\kern\Wrappedcontinuationindent\copy\Wrappedcontinuationbox} 
+        % Take advantage of the already applied Pygments mark-up to insert 
+        % potential linebreaks for TeX processing. 
+        %        {, <, #, %, $, ' and ": go to next line. 
+        %        _, }, ^, &, >, - and ~: stay at end of broken line. 
+        % Use of \textquotesingle for straight quote. 
+        \newcommand*\Wrappedbreaksatspecials {% 
+            \def\PYGZus{\discretionary{\char`\_}{\Wrappedafterbreak}{\char`\_}}% 
+            \def\PYGZob{\discretionary{}{\Wrappedafterbreak\char`\{}{\char`\{}}% 
+            \def\PYGZcb{\discretionary{\char`\}}{\Wrappedafterbreak}{\char`\}}}% 
+            \def\PYGZca{\discretionary{\char`\^}{\Wrappedafterbreak}{\char`\^}}% 
+            \def\PYGZam{\discretionary{\char`\&}{\Wrappedafterbreak}{\char`\&}}% 
+            \def\PYGZlt{\discretionary{}{\Wrappedafterbreak\char`\<}{\char`\<}}% 
+            \def\PYGZgt{\discretionary{\char`\>}{\Wrappedafterbreak}{\char`\>}}% 
+            \def\PYGZsh{\discretionary{}{\Wrappedafterbreak\char`\#}{\char`\#}}% 
+            \def\PYGZpc{\discretionary{}{\Wrappedafterbreak\char`\%}{\char`\%}}% 
+            \def\PYGZdl{\discretionary{}{\Wrappedafterbreak\char`\$}{\char`\$}}% 
+            \def\PYGZhy{\discretionary{\char`\-}{\Wrappedafterbreak}{\char`\-}}% 
+            \def\PYGZsq{\discretionary{}{\Wrappedafterbreak\textquotesingle}{\textquotesingle}}% 
+            \def\PYGZdq{\discretionary{}{\Wrappedafterbreak\char`\"}{\char`\"}}% 
+            \def\PYGZti{\discretionary{\char`\~}{\Wrappedafterbreak}{\char`\~}}% 
+        } 
+        % Some characters . , ; ? ! / are not pygmentized. 
+        % This macro makes them "active" and they will insert potential linebreaks 
+        \newcommand*\Wrappedbreaksatpunct {% 
+            \lccode`\~`\.\lowercase{\def~}{\discretionary{\hbox{\char`\.}}{\Wrappedafterbreak}{\hbox{\char`\.}}}% 
+            \lccode`\~`\,\lowercase{\def~}{\discretionary{\hbox{\char`\,}}{\Wrappedafterbreak}{\hbox{\char`\,}}}% 
+            \lccode`\~`\;\lowercase{\def~}{\discretionary{\hbox{\char`\;}}{\Wrappedafterbreak}{\hbox{\char`\;}}}% 
+            \lccode`\~`\:\lowercase{\def~}{\discretionary{\hbox{\char`\:}}{\Wrappedafterbreak}{\hbox{\char`\:}}}% 
+            \lccode`\~`\?\lowercase{\def~}{\discretionary{\hbox{\char`\?}}{\Wrappedafterbreak}{\hbox{\char`\?}}}% 
+            \lccode`\~`\!\lowercase{\def~}{\discretionary{\hbox{\char`\!}}{\Wrappedafterbreak}{\hbox{\char`\!}}}% 
+            \lccode`\~`\/\lowercase{\def~}{\discretionary{\hbox{\char`\/}}{\Wrappedafterbreak}{\hbox{\char`\/}}}% 
+            \catcode`\.\active
+            \catcode`\,\active 
+            \catcode`\;\active
+            \catcode`\:\active
+            \catcode`\?\active
+            \catcode`\!\active
+            \catcode`\/\active 
+            \lccode`\~`\~ 	
+        }
+    \makeatother
+
+    \let\OriginalVerbatim=\Verbatim
+    \makeatletter
+    \renewcommand{\Verbatim}[1][1]{%
+        %\parskip\z@skip
+        \sbox\Wrappedcontinuationbox {\Wrappedcontinuationsymbol}%
+        \sbox\Wrappedvisiblespacebox {\FV@SetupFont\Wrappedvisiblespace}%
+        \def\FancyVerbFormatLine ##1{\hsize\linewidth
+            \vtop{\raggedright\hyphenpenalty\z@\exhyphenpenalty\z@
+                \doublehyphendemerits\z@\finalhyphendemerits\z@
+                \strut ##1\strut}%
+        }%
+        % If the linebreak is at a space, the latter will be displayed as visible
+        % space at end of first line, and a continuation symbol starts next line.
+        % Stretch/shrink are however usually zero for typewriter font.
+        \def\FV@Space {%
+            \nobreak\hskip\z@ plus\fontdimen3\font minus\fontdimen4\font
+            \discretionary{\copy\Wrappedvisiblespacebox}{\Wrappedafterbreak}
+            {\kern\fontdimen2\font}%
+        }%
+        
+        % Allow breaks at special characters using \PYG... macros.
+        \Wrappedbreaksatspecials
+        % Breaks at punctuation characters . , ; ? ! and / need catcode=\active 	
+        \OriginalVerbatim[#1,codes*=\Wrappedbreaksatpunct]%
+    }
+    \makeatother
+
     % Exact colors from NB
-    \definecolor{incolor}{rgb}{0.0, 0.0, 0.5}
-    \definecolor{outcolor}{rgb}{0.545, 0.0, 0.0}
-
-
+    \definecolor{incolor}{HTML}{303F9F}
+    \definecolor{outcolor}{HTML}{D84315}
+    \definecolor{cellborder}{HTML}{CFCFCF}
+    \definecolor{cellbackground}{HTML}{F7F7F7}
+    
+    % prompt
+    \makeatletter
+    \newcommand{\boxspacing}{\kern\kvtcb@left@rule\kern\kvtcb@boxsep}
+    \makeatother
+    \newcommand{\prompt}[4]{
+        {\ttfamily\llap{{\color{#2}[#3]:\hspace{3pt}#4}}\vspace{-\baselineskip}}
+    }
+    
 
     
     % Prevent overflowing lines due to hard-to-break entities
@@ -282,8 +372,7 @@
     
     
 
-    \begin{document}
-    
+\begin{document}
     
     \maketitle
     
@@ -295,393 +384,539 @@
 \begin{itemize}
 \tightlist
 \item
-  Section \ref{set-up-cells}
+  \hyperref[set-up-cells]{Setup with libraries}
 \item
-  Section \ref{create-simulated-dataset}
+  \hyperref[create-simulated-dataset]{Create Simulated Dataset}
 
   \begin{itemize}
   \tightlist
   \item
-    Section \ref{forming-independent-variables}
+    \hyperref[forming-independent-variables]{Forming independent variables}
   \item
-    Section \ref{creating-y-variable-with-poisson-distribution}
+    \hyperref[creating-y-variable-with-poisson-distribution]{Creating y variable with Poisson distribution}
   \end{itemize}
 \item
-  Section \ref{univariate-example}
+  \hyperref[univariate-example]{Univariate example}
 
   \begin{itemize}
   \tightlist
   \item
-    Section \ref{bandwidth-random-initialization-check}
+    \hyperref[bandwidth-random-initialization-check]{Bandwidth: Random initialization check}
   \item
-    Section \ref{parameters-check}
+    \hyperref[parameters-check]{Parameters check}
   \end{itemize}
 \item
-  Section \ref{multivariate-example}
+  \hyperref[multivariate-example]{Multivariate example}
 
   \begin{itemize}
   \tightlist
   \item
-    Section \ref{bandwidths-random-initialization-check}
+    \hyperref[bandwidths-random-initialization-check]{Bandwidths: Random initialization check}
   \item
-    Section \ref{parameters-check}
+    \hyperref[parameters-check]{Parameters check}
   \end{itemize}
 \item
-  Section \ref{global-model-parameter-check}
+  \hyperref[global-model-parameter-check]{Global model parameter check}
 \end{itemize}
 
     Branch - gsco19
 
 PR - https://github.com/pysal/mgwr/pull/60
 
-    \subsubsection{Set up Cells}\label{set-up-cells}
+    \hypertarget{set-up-cells}{%
+\subsubsection{Set up Cells}\label{set-up-cells}}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}1}]:} \PY{k+kn}{import} \PY{n+nn}{sys}
-        \PY{c+c1}{\PYZsh{}change path here to point to your folder}
-        \PY{n}{sys}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{C:/Users/msachde1/Downloads/Research/Development/mgwr}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-\end{Verbatim}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}2}]:} \PY{k+kn}{import} \PY{n+nn}{warnings}
-        \PY{n}{warnings}\PY{o}{.}\PY{n}{filterwarnings}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ignore}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
-        \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
-        
-        \PY{k+kn}{from} \PY{n+nn}{mgwr}\PY{n+nn}{.}\PY{n+nn}{gwr} \PY{k}{import} \PY{n}{GWR}
-        \PY{k+kn}{from} \PY{n+nn}{spglm}\PY{n+nn}{.}\PY{n+nn}{family} \PY{k}{import} \PY{n}{Gaussian}\PY{p}{,} \PY{n}{Binomial}\PY{p}{,} \PY{n}{Poisson}
-        \PY{k+kn}{from} \PY{n+nn}{mgwr}\PY{n+nn}{.}\PY{n+nn}{gwr} \PY{k}{import} \PY{n}{MGWR}
-        \PY{k+kn}{from} \PY{n+nn}{mgwr}\PY{n+nn}{.}\PY{n+nn}{sel\PYZus{}bw} \PY{k}{import} \PY{n}{Sel\PYZus{}BW}
-        \PY{k+kn}{import} \PY{n+nn}{multiprocessing} \PY{k}{as} \PY{n+nn}{mp}
-        \PY{n}{pool} \PY{o}{=} \PY{n}{mp}\PY{o}{.}\PY{n}{Pool}\PY{p}{(}\PY{p}{)}
-        \PY{k+kn}{from} \PY{n+nn}{scipy} \PY{k}{import} \PY{n}{linalg}
-        \PY{k+kn}{import} \PY{n+nn}{numpy}\PY{n+nn}{.}\PY{n+nn}{linalg} \PY{k}{as} \PY{n+nn}{la}
-        \PY{k+kn}{from} \PY{n+nn}{scipy} \PY{k}{import} \PY{n}{sparse} \PY{k}{as} \PY{n}{sp}
-        \PY{k+kn}{from} \PY{n+nn}{scipy}\PY{n+nn}{.}\PY{n+nn}{sparse} \PY{k}{import} \PY{n}{linalg} \PY{k}{as} \PY{n}{spla}
-        \PY{k+kn}{from} \PY{n+nn}{spreg}\PY{n+nn}{.}\PY{n+nn}{utils} \PY{k}{import} \PY{n}{spdot}\PY{p}{,} \PY{n}{spmultiply}
-        \PY{k+kn}{from} \PY{n+nn}{scipy} \PY{k}{import} \PY{n}{special}
-        \PY{k+kn}{import} \PY{n+nn}{libpysal} \PY{k}{as} \PY{n+nn}{ps}
-        \PY{k+kn}{import} \PY{n+nn}{seaborn} \PY{k}{as} \PY{n+nn}{sns}
-        \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
-        \PY{k+kn}{from} \PY{n+nn}{copy} \PY{k}{import} \PY{n}{deepcopy}
-        \PY{k+kn}{import} \PY{n+nn}{copy}
-        \PY{k+kn}{from} \PY{n+nn}{collections} \PY{k}{import} \PY{n}{namedtuple}
-        \PY{k+kn}{import} \PY{n+nn}{spglm}
-\end{Verbatim}
-
-    \subsubsection{Create Simulated Dataset}\label{create-simulated-dataset}
-
-    \paragraph{Forming independent
-variables}\label{forming-independent-variables}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}3}]:} \PY{k}{def} \PY{n+nf}{add}\PY{p}{(}\PY{n}{a}\PY{p}{,}\PY{n}{b}\PY{p}{)}\PY{p}{:}
-            \PY{k}{return} \PY{l+m+mi}{1}\PY{o}{+}\PY{p}{(}\PY{p}{(}\PY{l+m+mi}{1}\PY{o}{/}\PY{l+m+mi}{120}\PY{p}{)}\PY{o}{*}\PY{p}{(}\PY{n}{a}\PY{o}{+}\PY{n}{b}\PY{p}{)}\PY{p}{)}
-        
-        \PY{k}{def} \PY{n+nf}{con}\PY{p}{(}\PY{n}{u}\PY{p}{,}\PY{n}{v}\PY{p}{)}\PY{p}{:}
-            \PY{k}{return} \PY{p}{(}\PY{l+m+mi}{0}\PY{o}{*}\PY{p}{(}\PY{n}{u}\PY{p}{)}\PY{o}{*}\PY{p}{(}\PY{n}{v}\PY{p}{)}\PY{p}{)}\PY{o}{+}\PY{l+m+mf}{0.3}
-        
-        \PY{k}{def} \PY{n+nf}{sp}\PY{p}{(}\PY{n}{u}\PY{p}{,}\PY{n}{v}\PY{p}{)}\PY{p}{:}
-            \PY{k}{return} \PY{l+m+mi}{1}\PY{o}{+}\PY{l+m+mi}{1}\PY{o}{/}\PY{l+m+mi}{3240}\PY{o}{*}\PY{p}{(}\PY{l+m+mi}{36}\PY{o}{\PYZhy{}}\PY{p}{(}\PY{l+m+mi}{6}\PY{o}{\PYZhy{}}\PY{n}{u}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{)}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2}\PY{p}{)}\PY{o}{*}\PY{p}{(}\PY{l+m+mi}{36}\PY{o}{\PYZhy{}}\PY{p}{(}\PY{l+m+mi}{6}\PY{o}{\PYZhy{}}\PY{n}{v}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{)}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2}\PY{p}{)}
-\end{Verbatim}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}4}]:} \PY{n}{x} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{25}\PY{p}{,} \PY{l+m+mi}{25}\PY{p}{)}
-        \PY{n}{y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{25}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{25}\PY{p}{)}
-        \PY{n}{X}\PY{p}{,} \PY{n}{Y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{meshgrid}\PY{p}{(}\PY{n}{x}\PY{p}{,} \PY{n}{y}\PY{p}{)}
-\end{Verbatim}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}5}]:} \PY{n}{x1}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{random}\PY{o}{.}\PY{n}{normal}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{625}\PY{p}{)}
-        \PY{n}{x2}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{random}\PY{o}{.}\PY{n}{normal}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{625}\PY{p}{)}
-        \PY{n}{error} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{random}\PY{o}{.}\PY{n}{normal}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mi}{625}\PY{p}{)}
-\end{Verbatim}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}6}]:} \PY{n}{B0}\PY{o}{=}\PY{n}{con}\PY{p}{(}\PY{n}{X}\PY{p}{,}\PY{n}{Y}\PY{p}{)}
-        \PY{n}{B1}\PY{o}{=}\PY{n}{add}\PY{p}{(}\PY{n}{X}\PY{p}{,}\PY{n}{Y}\PY{p}{)}
-        \PY{n}{B2}\PY{o}{=}\PY{n}{sp}\PY{p}{(}\PY{n}{X}\PY{p}{,}\PY{n}{Y}\PY{p}{)}
-\end{Verbatim}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}7}]:} \PY{n}{plt}\PY{o}{.}\PY{n}{imshow}\PY{p}{(}\PY{n}{B0}\PY{p}{,} \PY{n}{extent}\PY{o}{=}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{10}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{]}\PY{p}{,} \PY{n}{origin}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lower}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{cmap}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Blues}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{colorbar}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{axis}\PY{p}{(}\PY{n}{aspect}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{image}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{xticks}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{yticks}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{)}
-\end{Verbatim}
-
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{1}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}7}]:} ([], <a list of 0 Text yticklabel objects>)
+\PY{k+kn}{import} \PY{n+nn}{sys}
+\PY{c+c1}{\PYZsh{}change path here to point to your folder}
+\PY{n}{sys}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{C:/Users/msachde1/Downloads/Research/Development/mgwr}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 \end{Verbatim}
-            
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{2}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{import} \PY{n+nn}{warnings}
+\PY{n}{warnings}\PY{o}{.}\PY{n}{filterwarnings}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ignore}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+\PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
+\PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
+
+\PY{k+kn}{from} \PY{n+nn}{mgwr}\PY{n+nn}{.}\PY{n+nn}{gwr} \PY{k+kn}{import} \PY{n}{GWR}
+\PY{k+kn}{from} \PY{n+nn}{spglm}\PY{n+nn}{.}\PY{n+nn}{family} \PY{k+kn}{import} \PY{n}{Gaussian}\PY{p}{,} \PY{n}{Binomial}\PY{p}{,} \PY{n}{Poisson}
+\PY{k+kn}{from} \PY{n+nn}{mgwr}\PY{n+nn}{.}\PY{n+nn}{gwr} \PY{k+kn}{import} \PY{n}{MGWR}
+\PY{k+kn}{from} \PY{n+nn}{mgwr}\PY{n+nn}{.}\PY{n+nn}{sel\PYZus{}bw} \PY{k+kn}{import} \PY{n}{Sel\PYZus{}BW}
+\PY{k+kn}{import} \PY{n+nn}{multiprocessing} \PY{k}{as} \PY{n+nn}{mp}
+\PY{n}{pool} \PY{o}{=} \PY{n}{mp}\PY{o}{.}\PY{n}{Pool}\PY{p}{(}\PY{p}{)}
+\PY{k+kn}{from} \PY{n+nn}{scipy} \PY{k+kn}{import} \PY{n}{linalg}
+\PY{k+kn}{import} \PY{n+nn}{numpy}\PY{n+nn}{.}\PY{n+nn}{linalg} \PY{k}{as} \PY{n+nn}{la}
+\PY{k+kn}{from} \PY{n+nn}{scipy} \PY{k+kn}{import} \PY{n}{sparse} \PY{k}{as} \PY{n}{sp}
+\PY{k+kn}{from} \PY{n+nn}{scipy}\PY{n+nn}{.}\PY{n+nn}{sparse} \PY{k+kn}{import} \PY{n}{linalg} \PY{k}{as} \PY{n}{spla}
+\PY{k+kn}{from} \PY{n+nn}{spreg}\PY{n+nn}{.}\PY{n+nn}{utils} \PY{k+kn}{import} \PY{n}{spdot}\PY{p}{,} \PY{n}{spmultiply}
+\PY{k+kn}{from} \PY{n+nn}{scipy} \PY{k+kn}{import} \PY{n}{special}
+\PY{k+kn}{import} \PY{n+nn}{libpysal} \PY{k}{as} \PY{n+nn}{ps}
+\PY{k+kn}{import} \PY{n+nn}{seaborn} \PY{k}{as} \PY{n+nn}{sns}
+\PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
+\PY{k+kn}{from} \PY{n+nn}{copy} \PY{k+kn}{import} \PY{n}{deepcopy}
+\PY{k+kn}{import} \PY{n+nn}{copy}
+\PY{k+kn}{from} \PY{n+nn}{collections} \PY{k+kn}{import} \PY{n}{namedtuple}
+\PY{k+kn}{import} \PY{n+nn}{spglm}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \hypertarget{create-simulated-dataset}{%
+\subsubsection{Create Simulated
+Dataset}\label{create-simulated-dataset}}
+
+    \hypertarget{forming-independent-variables}{%
+\paragraph{Forming independent
+variables}\label{forming-independent-variables}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{3}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{def} \PY{n+nf}{add}\PY{p}{(}\PY{n}{a}\PY{p}{,}\PY{n}{b}\PY{p}{)}\PY{p}{:}
+    \PY{k}{return} \PY{l+m+mi}{1}\PY{o}{+}\PY{p}{(}\PY{p}{(}\PY{l+m+mi}{1}\PY{o}{/}\PY{l+m+mi}{120}\PY{p}{)}\PY{o}{*}\PY{p}{(}\PY{n}{a}\PY{o}{+}\PY{n}{b}\PY{p}{)}\PY{p}{)}
+
+\PY{k}{def} \PY{n+nf}{con}\PY{p}{(}\PY{n}{u}\PY{p}{,}\PY{n}{v}\PY{p}{)}\PY{p}{:}
+    \PY{k}{return} \PY{p}{(}\PY{l+m+mi}{0}\PY{o}{*}\PY{p}{(}\PY{n}{u}\PY{p}{)}\PY{o}{*}\PY{p}{(}\PY{n}{v}\PY{p}{)}\PY{p}{)}\PY{o}{+}\PY{l+m+mf}{0.3}
+
+\PY{k}{def} \PY{n+nf}{sp}\PY{p}{(}\PY{n}{u}\PY{p}{,}\PY{n}{v}\PY{p}{)}\PY{p}{:}
+    \PY{k}{return} \PY{l+m+mi}{1}\PY{o}{+}\PY{l+m+mi}{1}\PY{o}{/}\PY{l+m+mi}{3240}\PY{o}{*}\PY{p}{(}\PY{l+m+mi}{36}\PY{o}{\PYZhy{}}\PY{p}{(}\PY{l+m+mi}{6}\PY{o}{\PYZhy{}}\PY{n}{u}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{)}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2}\PY{p}{)}\PY{o}{*}\PY{p}{(}\PY{l+m+mi}{36}\PY{o}{\PYZhy{}}\PY{p}{(}\PY{l+m+mi}{6}\PY{o}{\PYZhy{}}\PY{n}{v}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{)}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{4}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{x} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{25}\PY{p}{,} \PY{l+m+mi}{25}\PY{p}{)}
+\PY{n}{y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{25}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{25}\PY{p}{)}
+\PY{n}{X}\PY{p}{,} \PY{n}{Y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{meshgrid}\PY{p}{(}\PY{n}{x}\PY{p}{,} \PY{n}{y}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{5}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{x1}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{random}\PY{o}{.}\PY{n}{normal}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{625}\PY{p}{)}
+\PY{n}{x2}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{random}\PY{o}{.}\PY{n}{normal}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{625}\PY{p}{)}
+\PY{n}{error} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{random}\PY{o}{.}\PY{n}{normal}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mi}{625}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{6}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{B0}\PY{o}{=}\PY{n}{con}\PY{p}{(}\PY{n}{X}\PY{p}{,}\PY{n}{Y}\PY{p}{)}
+\PY{n}{B1}\PY{o}{=}\PY{n}{add}\PY{p}{(}\PY{n}{X}\PY{p}{,}\PY{n}{Y}\PY{p}{)}
+\PY{n}{B2}\PY{o}{=}\PY{n}{sp}\PY{p}{(}\PY{n}{X}\PY{p}{,}\PY{n}{Y}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{7}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{plt}\PY{o}{.}\PY{n}{imshow}\PY{p}{(}\PY{n}{B0}\PY{p}{,} \PY{n}{extent}\PY{o}{=}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{10}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{]}\PY{p}{,} \PY{n}{origin}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lower}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{cmap}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Blues}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{colorbar}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{axis}\PY{p}{(}\PY{n}{aspect}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{image}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xticks}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{yticks}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{7}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+([], <a list of 0 Text yticklabel objects>)
+\end{Verbatim}
+\end{tcolorbox}
+        
     \begin{center}
     \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Simulated_data_example_Poisson-MGWR_files/Simulated_data_example_Poisson-MGWR_11_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}8}]:} \PY{n}{plt}\PY{o}{.}\PY{n}{imshow}\PY{p}{(}\PY{n}{B1}\PY{p}{,} \PY{n}{extent}\PY{o}{=}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{10}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{]}\PY{p}{,} \PY{n}{origin}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lower}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{cmap}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{RdBu\PYZus{}r}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{colorbar}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{axis}\PY{p}{(}\PY{n}{aspect}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{image}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{xticks}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{yticks}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{)}
-\end{Verbatim}
-
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{8}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}8}]:} ([], <a list of 0 Text yticklabel objects>)
+\PY{n}{plt}\PY{o}{.}\PY{n}{imshow}\PY{p}{(}\PY{n}{B1}\PY{p}{,} \PY{n}{extent}\PY{o}{=}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{10}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{]}\PY{p}{,} \PY{n}{origin}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lower}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{cmap}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{RdBu\PYZus{}r}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{colorbar}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{axis}\PY{p}{(}\PY{n}{aspect}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{image}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xticks}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{yticks}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{)}
 \end{Verbatim}
-            
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{8}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+([], <a list of 0 Text yticklabel objects>)
+\end{Verbatim}
+\end{tcolorbox}
+        
     \begin{center}
     \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Simulated_data_example_Poisson-MGWR_files/Simulated_data_example_Poisson-MGWR_12_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}9}]:} \PY{n}{plt}\PY{o}{.}\PY{n}{imshow}\PY{p}{(}\PY{n}{B2}\PY{p}{,} \PY{n}{extent}\PY{o}{=}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{25}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{25}\PY{p}{]}\PY{p}{,} \PY{n}{origin}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lower}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{cmap}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{RdBu\PYZus{}r}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{colorbar}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{axis}\PY{p}{(}\PY{n}{aspect}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{image}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{xticks}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{yticks}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{)}
-\end{Verbatim}
-
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{9}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}9}]:} ([], <a list of 0 Text yticklabel objects>)
+\PY{n}{plt}\PY{o}{.}\PY{n}{imshow}\PY{p}{(}\PY{n}{B2}\PY{p}{,} \PY{n}{extent}\PY{o}{=}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{25}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{25}\PY{p}{]}\PY{p}{,} \PY{n}{origin}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lower}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{cmap}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{RdBu\PYZus{}r}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{colorbar}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{axis}\PY{p}{(}\PY{n}{aspect}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{image}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xticks}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{yticks}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{)}
 \end{Verbatim}
-            
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{9}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+([], <a list of 0 Text yticklabel objects>)
+\end{Verbatim}
+\end{tcolorbox}
+        
     \begin{center}
     \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Simulated_data_example_Poisson-MGWR_files/Simulated_data_example_Poisson-MGWR_13_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}10}]:} \PY{n}{B0}\PY{o}{=}\PY{n}{B0}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
-         \PY{n}{B1}\PY{o}{=}\PY{n}{B1}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
-         \PY{n}{B2}\PY{o}{=}\PY{n}{B2}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{10}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{B0}\PY{o}{=}\PY{n}{B0}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
+\PY{n}{B1}\PY{o}{=}\PY{n}{B1}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
+\PY{n}{B2}\PY{o}{=}\PY{n}{B2}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
 \end{Verbatim}
+\end{tcolorbox}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}11}]:} \PY{n}{f}\PY{p}{,} \PY{n}{axes} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{,} \PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{4}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{)}\PY{p}{,} \PY{n}{sharex}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
-         \PY{n}{sns}\PY{o}{.}\PY{n}{despine}\PY{p}{(}\PY{n}{left}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
-         \PY{n}{sns}\PY{o}{.}\PY{n}{distplot}\PY{p}{(}\PY{n}{B0}\PY{p}{,}\PY{n}{ax}\PY{o}{=}\PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
-         \PY{n}{sns}\PY{o}{.}\PY{n}{distplot}\PY{p}{(}\PY{n}{B1}\PY{p}{,}\PY{n}{ax}\PY{o}{=}\PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
-         
-         \PY{n}{plt}\PY{o}{.}\PY{n}{setp}\PY{p}{(}\PY{n}{axes}\PY{p}{,} \PY{n}{yticks}\PY{o}{=}\PY{p}{[}\PY{p}{]}\PY{p}{)}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{tight\PYZus{}layout}\PY{p}{(}\PY{p}{)}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{11}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{f}\PY{p}{,} \PY{n}{axes} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{,} \PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{4}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{)}\PY{p}{,} \PY{n}{sharex}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{sns}\PY{o}{.}\PY{n}{despine}\PY{p}{(}\PY{n}{left}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{sns}\PY{o}{.}\PY{n}{distplot}\PY{p}{(}\PY{n}{B0}\PY{p}{,}\PY{n}{ax}\PY{o}{=}\PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
+\PY{n}{sns}\PY{o}{.}\PY{n}{distplot}\PY{p}{(}\PY{n}{B1}\PY{p}{,}\PY{n}{ax}\PY{o}{=}\PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{setp}\PY{p}{(}\PY{n}{axes}\PY{p}{,} \PY{n}{yticks}\PY{o}{=}\PY{p}{[}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{tight\PYZus{}layout}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
+\end{tcolorbox}
 
     \begin{center}
     \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Simulated_data_example_Poisson-MGWR_files/Simulated_data_example_Poisson-MGWR_15_0.png}
     \end{center}
     { \hspace*{\fill} \\}
     
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}12}]:} \PY{n}{sns}\PY{o}{.}\PY{n}{distplot}\PY{p}{(}\PY{n}{B2}\PY{p}{)}
-\end{Verbatim}
-
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{12}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}12}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x24e1fcd0828>
+\PY{n}{sns}\PY{o}{.}\PY{n}{distplot}\PY{p}{(}\PY{n}{B2}\PY{p}{)}
 \end{Verbatim}
-            
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{12}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+<matplotlib.axes.\_subplots.AxesSubplot at 0x24e1fcd0828>
+\end{Verbatim}
+\end{tcolorbox}
+        
     \begin{center}
     \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Simulated_data_example_Poisson-MGWR_files/Simulated_data_example_Poisson-MGWR_16_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}13}]:} \PY{n}{lat}\PY{o}{=}\PY{n}{Y}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
-         \PY{n}{lon}\PY{o}{=}\PY{n}{X}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
-\end{Verbatim}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}14}]:} \PY{n}{x1}\PY{o}{=}\PY{n}{x1}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
-         \PY{n}{x2}\PY{o}{=}\PY{n}{x2}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
-\end{Verbatim}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}15}]:} \PY{n}{param} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{hstack}\PY{p}{(}\PY{p}{[}\PY{n}{B0}\PY{p}{,}\PY{n}{B1}\PY{p}{,}\PY{n}{B2}\PY{p}{]}\PY{p}{)}
-         \PY{n}{cons}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{ones\PYZus{}like}\PY{p}{(}\PY{n}{x1}\PY{p}{)}
-         \PY{n}{X}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{hstack}\PY{p}{(}\PY{p}{[}\PY{n}{cons}\PY{p}{,}\PY{n}{x1}\PY{p}{,}\PY{n}{x2}\PY{p}{]}\PY{p}{)}
-\end{Verbatim}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}16}]:} \PY{n}{param}\PY{o}{.}\PY{n}{shape}\PY{p}{,}\PY{n}{X}\PY{o}{.}\PY{n}{shape}
-\end{Verbatim}
-
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{13}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}16}]:} ((625, 3), (625, 3))
+\PY{n}{lat}\PY{o}{=}\PY{n}{Y}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
+\PY{n}{lon}\PY{o}{=}\PY{n}{X}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
 \end{Verbatim}
-            
-    \paragraph{Creating y variable with Poisson
-distribution}\label{creating-y-variable-with-poisson-distribution}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{14}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{x1}\PY{o}{=}\PY{n}{x1}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
+\PY{n}{x2}\PY{o}{=}\PY{n}{x2}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{15}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{param} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{hstack}\PY{p}{(}\PY{p}{[}\PY{n}{B0}\PY{p}{,}\PY{n}{B1}\PY{p}{,}\PY{n}{B2}\PY{p}{]}\PY{p}{)}
+\PY{n}{cons}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{ones\PYZus{}like}\PY{p}{(}\PY{n}{x1}\PY{p}{)}
+\PY{n}{X}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{hstack}\PY{p}{(}\PY{p}{[}\PY{n}{cons}\PY{p}{,}\PY{n}{x1}\PY{p}{,}\PY{n}{x2}\PY{p}{]}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{16}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{param}\PY{o}{.}\PY{n}{shape}\PY{p}{,}\PY{n}{X}\PY{o}{.}\PY{n}{shape}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{16}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+((625, 3), (625, 3))
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \hypertarget{creating-y-variable-with-poisson-distribution}{%
+\paragraph{Creating y variable with Poisson
+distribution}\label{creating-y-variable-with-poisson-distribution}}
 
 Incorporating step from - Chapter 6. Simulating Generalized Linear
-Models, p. 153
+Models, p.~153
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}17}]:} \PY{c+c1}{\PYZsh{}y}
-         \PY{n}{y}\PY{o}{=}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{n}{X} \PY{o}{*} \PY{n}{param}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}\PY{o}{+}\PY{n}{error}\PY{p}{)}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}\PY{p}{)}
-         \PY{n}{y\PYZus{}new} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{random}\PY{o}{.}\PY{n}{poisson}\PY{p}{(}\PY{n}{y}\PY{p}{)}
-\end{Verbatim}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}18}]:} \PY{n}{y}\PY{o}{.}\PY{n}{shape}
-\end{Verbatim}
-
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{17}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}18}]:} (625, 1)
+\PY{c+c1}{\PYZsh{}y}
+\PY{n}{y}\PY{o}{=}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{n}{X} \PY{o}{*} \PY{n}{param}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}\PY{o}{+}\PY{n}{error}\PY{p}{)}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+\PY{n}{y\PYZus{}new} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{random}\PY{o}{.}\PY{n}{poisson}\PY{p}{(}\PY{n}{y}\PY{p}{)}
 \end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}19}]:} \PY{n}{sns}\PY{o}{.}\PY{n}{distplot}\PY{p}{(}\PY{n}{y}\PY{p}{)}
-\end{Verbatim}
+\end{tcolorbox}
 
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{18}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}19}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x24e1fdaaa90>
+\PY{n}{y}\PY{o}{.}\PY{n}{shape}
 \end{Verbatim}
-            
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{18}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+(625, 1)
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{19}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{sns}\PY{o}{.}\PY{n}{distplot}\PY{p}{(}\PY{n}{y}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{19}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+<matplotlib.axes.\_subplots.AxesSubplot at 0x24e1fdaaa90>
+\end{Verbatim}
+\end{tcolorbox}
+        
     \begin{center}
     \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Simulated_data_example_Poisson-MGWR_files/Simulated_data_example_Poisson-MGWR_24_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}20}]:} \PY{n}{sns}\PY{o}{.}\PY{n}{distplot}\PY{p}{(}\PY{n}{y\PYZus{}new}\PY{p}{)}
-\end{Verbatim}
-
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{20}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}20}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x24e1fef3828>
+\PY{n}{sns}\PY{o}{.}\PY{n}{distplot}\PY{p}{(}\PY{n}{y\PYZus{}new}\PY{p}{)}
 \end{Verbatim}
-            
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{20}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+<matplotlib.axes.\_subplots.AxesSubplot at 0x24e1fef3828>
+\end{Verbatim}
+\end{tcolorbox}
+        
     \begin{center}
     \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Simulated_data_example_Poisson-MGWR_files/Simulated_data_example_Poisson-MGWR_25_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}21}]:} \PY{n}{coords} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n+nb}{list}\PY{p}{(}\PY{n+nb}{zip}\PY{p}{(}\PY{n}{lon}\PY{p}{,}\PY{n}{lat}\PY{p}{)}\PY{p}{)}\PY{p}{)}
-         \PY{n}{y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{y\PYZus{}new}\PY{p}{)}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}
-\end{Verbatim}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}22}]:} \PY{n}{x}\PY{o}{=}\PY{n}{x1}
-         \PY{n}{x\PYZus{}std} \PY{o}{=} \PY{p}{(}\PY{n}{x}\PY{o}{\PYZhy{}}\PY{n}{x}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{x}\PY{o}{.}\PY{n}{std}\PY{p}{(}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
-         \PY{n}{X}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{hstack}\PY{p}{(}\PY{p}{[}\PY{n}{x1}\PY{p}{,}\PY{n}{x2}\PY{p}{]}\PY{p}{)}
-         \PY{n}{X\PYZus{}std} \PY{o}{=} \PY{p}{(}\PY{n}{X}\PY{o}{\PYZhy{}}\PY{n}{X}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{X}\PY{o}{.}\PY{n}{std}\PY{p}{(}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
-\end{Verbatim}
-
-    \subsubsection{Univariate example}\label{univariate-example}
-
-    \paragraph{First example: checking GWR and MGWR models with one
-independent variable and constant =
-False}\label{first-example-checking-gwr-and-mgwr-models-with-one-independent-variable-and-constant-false}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}23}]:} \PY{n}{bw}\PY{o}{=}\PY{n}{Sel\PYZus{}BW}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{x}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{,}\PY{n}{constant}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
-         \PY{n}{bw}\PY{o}{=}\PY{n}{bw}\PY{o}{.}\PY{n}{search}\PY{p}{(}\PY{p}{)}
-         \PY{n}{gwr\PYZus{}model}\PY{o}{=}\PY{n}{GWR}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{x}\PY{p}{,}\PY{n}{bw}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{,}\PY{n}{constant}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{p}{)}
-         \PY{n}{bw}
-\end{Verbatim}
-
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{21}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}23}]:} 43.0
+\PY{n}{coords} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n+nb}{list}\PY{p}{(}\PY{n+nb}{zip}\PY{p}{(}\PY{n}{lon}\PY{p}{,}\PY{n}{lat}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+\PY{n}{y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{y\PYZus{}new}\PY{p}{)}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}
 \end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}24}]:} \PY{n}{selector}\PY{o}{=}\PY{n}{Sel\PYZus{}BW}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{x}\PY{p}{,}\PY{n}{multi}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{,}\PY{n}{constant}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
-         \PY{n}{selector}\PY{o}{.}\PY{n}{search}\PY{p}{(}\PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{22}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{x}\PY{o}{=}\PY{n}{x1}
+\PY{n}{x\PYZus{}std} \PY{o}{=} \PY{p}{(}\PY{n}{x}\PY{o}{\PYZhy{}}\PY{n}{x}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{x}\PY{o}{.}\PY{n}{std}\PY{p}{(}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+\PY{n}{X}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{hstack}\PY{p}{(}\PY{p}{[}\PY{n}{x1}\PY{p}{,}\PY{n}{x2}\PY{p}{]}\PY{p}{)}
+\PY{n}{X\PYZus{}std} \PY{o}{=} \PY{p}{(}\PY{n}{X}\PY{o}{\PYZhy{}}\PY{n}{X}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{X}\PY{o}{.}\PY{n}{std}\PY{p}{(}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
 \end{Verbatim}
+\end{tcolorbox}
+
+    \hypertarget{univariate-example}{%
+\subsubsection{Univariate example}\label{univariate-example}}
+
+    \hypertarget{first-example-checking-gwr-and-mgwr-models-with-one-independent-variable-and-constant-false}{%
+\paragraph{First example: checking GWR and MGWR models with one
+independent variable and constant =
+False}\label{first-example-checking-gwr-and-mgwr-models-with-one-independent-variable-and-constant-false}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{23}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{bw}\PY{o}{=}\PY{n}{Sel\PYZus{}BW}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{x}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{,}\PY{n}{constant}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
+\PY{n}{bw}\PY{o}{=}\PY{n}{bw}\PY{o}{.}\PY{n}{search}\PY{p}{(}\PY{p}{)}
+\PY{n}{gwr\PYZus{}model}\PY{o}{=}\PY{n}{GWR}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{x}\PY{p}{,}\PY{n}{bw}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{,}\PY{n}{constant}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{p}{)}
+\PY{n}{bw}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{23}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+43.0
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{24}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{selector}\PY{o}{=}\PY{n}{Sel\PYZus{}BW}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{x}\PY{p}{,}\PY{n}{multi}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{,}\PY{n}{constant}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
+\PY{n}{selector}\PY{o}{.}\PY{n}{search}\PY{p}{(}\PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
     \begin{Verbatim}[commandchars=\\\{\}]
 Current iteration: 1 ,SOC: 0.0
 Bandwidths: 43.0
-
     \end{Verbatim}
 
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{24}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}24}]:} array([43.])
+array([43.])
 \end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}25}]:} \PY{n}{mgwr\PYZus{}model}\PY{o}{=}\PY{n}{MGWR}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{x}\PY{p}{,}\PY{n}{selector}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{,}\PY{n}{constant}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{p}{)}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{25}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{mgwr\PYZus{}model}\PY{o}{=}\PY{n}{MGWR}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{x}\PY{p}{,}\PY{n}{selector}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{,}\PY{n}{constant}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
+\end{tcolorbox}
 
     
-    \begin{verbatim}
+    \begin{Verbatim}[commandchars=\\\{\}]
 HBox(children=(IntProgress(value=0, description='Inference', max=1), HTML(value='')))
-    \end{verbatim}
+    \end{Verbatim}
 
     
     \begin{Verbatim}[commandchars=\\\{\}]
-
 
     \end{Verbatim}
 
-    \paragraph{Bandwidth: Random initialization
-check}\label{bandwidth-random-initialization-check}
+    \hypertarget{bandwidth-random-initialization-check}{%
+\paragraph{Bandwidth: Random initialization
+check}\label{bandwidth-random-initialization-check}}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}26}]:} \PY{n}{selector}\PY{o}{.}\PY{n}{search}\PY{p}{(}\PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}\PY{n}{init\PYZus{}multi}\PY{o}{=}\PY{l+m+mi}{600}\PY{p}{)}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{26}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{selector}\PY{o}{.}\PY{n}{search}\PY{p}{(}\PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}\PY{n}{init\PYZus{}multi}\PY{o}{=}\PY{l+m+mi}{600}\PY{p}{)}
 \end{Verbatim}
+\end{tcolorbox}
 
     \begin{Verbatim}[commandchars=\\\{\}]
 Current iteration: 1 ,SOC: 0.0201116
 Bandwidths: 43.0
 Current iteration: 2 ,SOC: 0.0
 Bandwidths: 43.0
-
     \end{Verbatim}
 
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{26}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}26}]:} array([43.])
+array([43.])
 \end{Verbatim}
-            
-    \paragraph{Parameters check}\label{parameters-check}
+\end{tcolorbox}
+        
+    \hypertarget{parameters-check}{%
+\paragraph{Parameters check}\label{parameters-check}}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}27}]:} \PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{p}{(}\PY{p}{(}\PY{n}{gwr\PYZus{}model}\PY{o}{.}\PY{n}{params}\PY{o}{\PYZhy{}}\PY{n}{mgwr\PYZus{}model}\PY{o}{.}\PY{n}{params}\PY{p}{)}\PY{o}{==}\PY{l+m+mf}{0.0}\PY{p}{)}\PY{o}{==}\PY{k+kc}{True}\PY{p}{)}
-\end{Verbatim}
-
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{27}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}27}]:} 625
+\PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{p}{(}\PY{p}{(}\PY{n}{gwr\PYZus{}model}\PY{o}{.}\PY{n}{params}\PY{o}{\PYZhy{}}\PY{n}{mgwr\PYZus{}model}\PY{o}{.}\PY{n}{params}\PY{p}{)}\PY{o}{==}\PY{l+m+mf}{0.0}\PY{p}{)}\PY{o}{==}\PY{k+kc}{True}\PY{p}{)}
 \end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}28}]:} \PY{n}{gwr\PYZus{}model}\PY{o}{.}\PY{n}{aic}\PY{p}{,}\PY{n}{mgwr\PYZus{}model}\PY{o}{.}\PY{n}{aic}
-\end{Verbatim}
+\end{tcolorbox}
 
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{27}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}28}]:} (3458.604213385903, 3476.5331190431302)
+625
 \end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}29}]:} \PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{p}{(}\PY{n}{gwr\PYZus{}model}\PY{o}{.}\PY{n}{predy}\PY{o}{\PYZhy{}}\PY{n}{mgwr\PYZus{}model}\PY{o}{.}\PY{n}{predy}\PY{o}{==}\PY{l+m+mi}{0}\PY{p}{)}\PY{o}{==}\PY{k+kc}{True}\PY{p}{)}
-\end{Verbatim}
-
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{28}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}29}]:} 625
+\PY{n}{gwr\PYZus{}model}\PY{o}{.}\PY{n}{aic}\PY{p}{,}\PY{n}{mgwr\PYZus{}model}\PY{o}{.}\PY{n}{aic}
 \end{Verbatim}
-            
-    \subsubsection{Multivariate example}\label{multivariate-example}
+\end{tcolorbox}
 
-    \paragraph{Second example for multiple
-bandwidths}\label{second-example-for-multiple-bandwidths}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}30}]:} \PY{n}{bw}\PY{o}{=}\PY{n}{Sel\PYZus{}BW}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{X}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{)}
-         \PY{n}{bw}\PY{o}{=}\PY{n}{bw}\PY{o}{.}\PY{n}{search}\PY{p}{(}\PY{p}{)}
-         \PY{n}{gwr\PYZus{}model}\PY{o}{=}\PY{n}{GWR}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{X}\PY{p}{,}\PY{n}{bw}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{)}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{p}{)}
-         \PY{n}{bw}
-\end{Verbatim}
-
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{28}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}30}]:} 103.0
+(3458.604213385903, 3476.5331190431302)
 \end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}31}]:} \PY{n}{selector}\PY{o}{=}\PY{n}{Sel\PYZus{}BW}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{X}\PY{p}{,}\PY{n}{multi}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{)}
-         \PY{n}{selector}\PY{o}{.}\PY{n}{search}\PY{p}{(}\PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{29}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{p}{(}\PY{n}{gwr\PYZus{}model}\PY{o}{.}\PY{n}{predy}\PY{o}{\PYZhy{}}\PY{n}{mgwr\PYZus{}model}\PY{o}{.}\PY{n}{predy}\PY{o}{==}\PY{l+m+mi}{0}\PY{p}{)}\PY{o}{==}\PY{k+kc}{True}\PY{p}{)}
 \end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{29}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+625
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \hypertarget{multivariate-example}{%
+\subsubsection{Multivariate example}\label{multivariate-example}}
+
+    \hypertarget{second-example-for-multiple-bandwidths}{%
+\paragraph{Second example for multiple
+bandwidths}\label{second-example-for-multiple-bandwidths}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{30}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{bw}\PY{o}{=}\PY{n}{Sel\PYZus{}BW}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{X}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{)}
+\PY{n}{bw}\PY{o}{=}\PY{n}{bw}\PY{o}{.}\PY{n}{search}\PY{p}{(}\PY{p}{)}
+\PY{n}{gwr\PYZus{}model}\PY{o}{=}\PY{n}{GWR}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{X}\PY{p}{,}\PY{n}{bw}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{)}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{p}{)}
+\PY{n}{bw}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{30}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+103.0
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{31}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{selector}\PY{o}{=}\PY{n}{Sel\PYZus{}BW}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{X}\PY{p}{,}\PY{n}{multi}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{)}
+\PY{n}{selector}\PY{o}{.}\PY{n}{search}\PY{p}{(}\PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
     \begin{Verbatim}[commandchars=\\\{\}]
 Current iteration: 1 ,SOC: 0.0056638
@@ -694,78 +929,112 @@ Current iteration: 4 ,SOC: 2.35e-05
 Bandwidths: 400.0, 48.0, 44.0
 Current iteration: 5 ,SOC: 6.6e-06
 Bandwidths: 400.0, 48.0, 44.0
-
     \end{Verbatim}
 
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{31}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}31}]:} array([400.,  48.,  44.])
+array([400.,  48.,  44.])
 \end{Verbatim}
-            
-    \paragraph{Bandwidths: Random initialization
-check}\label{bandwidths-random-initialization-check}
+\end{tcolorbox}
+        
+    \hypertarget{bandwidths-random-initialization-check}{%
+\paragraph{Bandwidths: Random initialization
+check}\label{bandwidths-random-initialization-check}}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor} }]:} \PY{n}{selector}\PY{o}{.}\PY{n}{search}\PY{p}{(}\PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}\PY{n}{init\PYZus{}multi}\PY{o}{=}\PY{l+m+mi}{600}\PY{p}{)}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{selector}\PY{o}{.}\PY{n}{search}\PY{p}{(}\PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}\PY{n}{init\PYZus{}multi}\PY{o}{=}\PY{l+m+mi}{600}\PY{p}{)}
 \end{Verbatim}
+\end{tcolorbox}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}32}]:} \PY{n}{mgwr\PYZus{}model}\PY{o}{=}\PY{n}{MGWR}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{X}\PY{p}{,}\PY{n}{selector}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{)}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{p}{)}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{32}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{mgwr\PYZus{}model}\PY{o}{=}\PY{n}{MGWR}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{X}\PY{p}{,}\PY{n}{selector}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{)}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
+\end{tcolorbox}
 
     
-    \begin{verbatim}
+    \begin{Verbatim}[commandchars=\\\{\}]
 HBox(children=(IntProgress(value=0, description='Inference', max=1), HTML(value='')))
-    \end{verbatim}
+    \end{Verbatim}
 
     
     \begin{Verbatim}[commandchars=\\\{\}]
 
-
     \end{Verbatim}
 
-    \paragraph{Parameters check}\label{parameters-check}
+    \hypertarget{parameters-check}{%
+\paragraph{Parameters check}\label{parameters-check}}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}34}]:} \PY{n+nb}{max}\PY{p}{(}\PY{n}{gwr\PYZus{}model}\PY{o}{.}\PY{n}{predy}\PY{o}{\PYZhy{}}\PY{n}{mgwr\PYZus{}model}\PY{o}{.}\PY{n}{predy}\PY{p}{)}\PY{p}{[}\PY{p}{:}\PY{l+m+mi}{10}\PY{p}{]}
-\end{Verbatim}
-
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{34}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}34}]:} array([39.63245513])
+\PY{n+nb}{max}\PY{p}{(}\PY{n}{gwr\PYZus{}model}\PY{o}{.}\PY{n}{predy}\PY{o}{\PYZhy{}}\PY{n}{mgwr\PYZus{}model}\PY{o}{.}\PY{n}{predy}\PY{p}{)}\PY{p}{[}\PY{p}{:}\PY{l+m+mi}{10}\PY{p}{]}
 \end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}35}]:} \PY{n}{gwr\PYZus{}model}\PY{o}{.}\PY{n}{aic}\PY{p}{,} \PY{n}{mgwr\PYZus{}model}\PY{o}{.}\PY{n}{aic}
-\end{Verbatim}
+\end{tcolorbox}
 
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{34}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}35}]:} (651.1442030497388, 838.3196815747232)
+array([39.63245513])
 \end{Verbatim}
-            
-    \subsubsection{Global model parameter
-check}\label{global-model-parameter-check}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{35}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{gwr\PYZus{}model}\PY{o}{.}\PY{n}{aic}\PY{p}{,} \PY{n}{mgwr\PYZus{}model}\PY{o}{.}\PY{n}{aic}
+\end{Verbatim}
+\end{tcolorbox}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}36}]:} \PY{k+kn}{import} \PY{n+nn}{statsmodels}\PY{n+nn}{.}\PY{n+nn}{api} \PY{k}{as} \PY{n+nn}{sma}
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{35}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+(651.1442030497388, 838.3196815747232)
 \end{Verbatim}
+\end{tcolorbox}
+        
+    \hypertarget{global-model-parameter-check}{%
+\subsubsection{Global model parameter
+check}\label{global-model-parameter-check}}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}37}]:} \PY{n}{X\PYZus{}glob}\PY{o}{=}\PY{n}{sma}\PY{o}{.}\PY{n}{add\PYZus{}constant}\PY{p}{(}\PY{n}{X}\PY{p}{)}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{36}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{import} \PY{n+nn}{statsmodels}\PY{n+nn}{.}\PY{n+nn}{api} \PY{k}{as} \PY{n+nn}{sma}
 \end{Verbatim}
+\end{tcolorbox}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}38}]:} \PY{n}{poisson\PYZus{}mod} \PY{o}{=} \PY{n}{sma}\PY{o}{.}\PY{n}{Poisson}\PY{p}{(}\PY{n}{y}\PY{p}{,} \PY{n}{X\PYZus{}glob}\PY{p}{)}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{37}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{X\PYZus{}glob}\PY{o}{=}\PY{n}{sma}\PY{o}{.}\PY{n}{add\PYZus{}constant}\PY{p}{(}\PY{n}{X}\PY{p}{)}
 \end{Verbatim}
+\end{tcolorbox}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}39}]:} \PY{n}{poisson\PYZus{}res} \PY{o}{=} \PY{n}{poisson\PYZus{}mod}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{n}{method}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{newton}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-         \PY{n+nb}{print}\PY{p}{(}\PY{n}{poisson\PYZus{}res}\PY{o}{.}\PY{n}{summary}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{38}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{poisson\PYZus{}mod} \PY{o}{=} \PY{n}{sma}\PY{o}{.}\PY{n}{Poisson}\PY{p}{(}\PY{n}{y}\PY{p}{,} \PY{n}{X\PYZus{}glob}\PY{p}{)}
 \end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{39}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{poisson\PYZus{}res} \PY{o}{=} \PY{n}{poisson\PYZus{}mod}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{n}{method}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{newton}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{n}{poisson\PYZus{}res}\PY{o}{.}\PY{n}{summary}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
     \begin{Verbatim}[commandchars=\\\{\}]
 Optimization terminated successfully.
          Current function value: 1.604261
          Iterations 7
-                          Poisson Regression Results                          
+                          Poisson Regression Results
 ==============================================================================
 Dep. Variable:                      y   No. Observations:                  625
 Model:                        Poisson   Df Residuals:                      622
@@ -781,16 +1050,21 @@ const          0.2894      0.036      7.972      0.000       0.218       0.361
 x1             1.2009      0.019     62.905      0.000       1.163       1.238
 x2             1.1628      0.021     54.264      0.000       1.121       1.205
 ==============================================================================
-
     \end{Verbatim}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}40}]:} \PY{n}{selector}\PY{o}{=}\PY{n}{Sel\PYZus{}BW}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{X}\PY{p}{,}\PY{n}{multi}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{)}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{40}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{selector}\PY{o}{=}\PY{n}{Sel\PYZus{}BW}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{X}\PY{p}{,}\PY{n}{multi}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{)}
 \end{Verbatim}
+\end{tcolorbox}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}41}]:} \PY{n}{selector}\PY{o}{.}\PY{n}{search}\PY{p}{(}\PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}\PY{n}{multi\PYZus{}bw\PYZus{}min}\PY{o}{=}\PY{p}{[}\PY{l+m+mi}{625}\PY{p}{,}\PY{l+m+mi}{625}\PY{p}{,}\PY{l+m+mi}{625}\PY{p}{]}\PY{p}{,} \PY{n}{multi\PYZus{}bw\PYZus{}max}\PY{o}{=}\PY{p}{[}\PY{l+m+mi}{625}\PY{p}{,}\PY{l+m+mi}{625}\PY{p}{,}\PY{l+m+mi}{625}\PY{p}{]}\PY{p}{)}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{41}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{selector}\PY{o}{.}\PY{n}{search}\PY{p}{(}\PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}\PY{n}{multi\PYZus{}bw\PYZus{}min}\PY{o}{=}\PY{p}{[}\PY{l+m+mi}{625}\PY{p}{,}\PY{l+m+mi}{625}\PY{p}{,}\PY{l+m+mi}{625}\PY{p}{]}\PY{p}{,} \PY{n}{multi\PYZus{}bw\PYZus{}max}\PY{o}{=}\PY{p}{[}\PY{l+m+mi}{625}\PY{p}{,}\PY{l+m+mi}{625}\PY{p}{,}\PY{l+m+mi}{625}\PY{p}{]}\PY{p}{)}
 \end{Verbatim}
+\end{tcolorbox}
 
     \begin{Verbatim}[commandchars=\\\{\}]
 Current iteration: 1 ,SOC: 0.0067699
@@ -801,47 +1075,58 @@ Current iteration: 3 ,SOC: 0.0001351
 Bandwidths: 625.0, 625.0, 625.0
 Current iteration: 4 ,SOC: 4.2e-06
 Bandwidths: 625.0, 625.0, 625.0
-
     \end{Verbatim}
 
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{41}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}41}]:} array([625., 625., 625.])
+array([625., 625., 625.])
 \end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}42}]:} \PY{n}{mgwr\PYZus{}model}\PY{o}{=}\PY{n}{MGWR}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{X}\PY{p}{,}\PY{n}{selector}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{)}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{p}{)}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{42}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{mgwr\PYZus{}model}\PY{o}{=}\PY{n}{MGWR}\PY{p}{(}\PY{n}{coords}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{X}\PY{p}{,}\PY{n}{selector}\PY{p}{,}\PY{n}{family}\PY{o}{=}\PY{n}{Poisson}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{offset}\PY{o}{=}\PY{k+kc}{None}\PY{p}{)}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
+\end{tcolorbox}
 
     
-    \begin{verbatim}
+    \begin{Verbatim}[commandchars=\\\{\}]
 HBox(children=(IntProgress(value=0, description='Inference', max=1), HTML(value='')))
-    \end{verbatim}
+    \end{Verbatim}
 
     
     \begin{Verbatim}[commandchars=\\\{\}]
 
-
     \end{Verbatim}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}43}]:} \PY{n}{mgwr\PYZus{}model}\PY{o}{.}\PY{n}{params}\PY{p}{[}\PY{p}{:}\PY{l+m+mi}{5}\PY{p}{]}
-\end{Verbatim}
-
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{43}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}43}]:} array([[0.24911341, 1.22606055, 1.19712663],
-                [0.25309895, 1.2283422 , 1.19713621],
-                [0.25724177, 1.23072827, 1.19708916],
-                [0.26154154, 1.23322148, 1.19697204],
-                [0.26599496, 1.23582348, 1.19676824]])
+\PY{n}{mgwr\PYZus{}model}\PY{o}{.}\PY{n}{params}\PY{p}{[}\PY{p}{:}\PY{l+m+mi}{5}\PY{p}{]}
 \end{Verbatim}
-            
-    \subparagraph{parameters similar for global Poisson model and forced
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{43}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+array([[0.24911341, 1.22606055, 1.19712663],
+       [0.25309895, 1.2283422 , 1.19713621],
+       [0.25724177, 1.23072827, 1.19708916],
+       [0.26154154, 1.23322148, 1.19697204],
+       [0.26599496, 1.23582348, 1.19676824]])
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \hypertarget{parameters-similar-for-global-poisson-model-and-forced-global-mgwr-poisson-model}{%
+\subparagraph{parameters similar for global Poisson model and forced
 global MGWR Poisson
-model}\label{parameters-similar-for-global-poisson-model-and-forced-global-mgwr-poisson-model}
+model}\label{parameters-similar-for-global-poisson-model-and-forced-global-mgwr-poisson-model}}
 
 
     % Add a bibliography block to the postdoc
     
     
     
-    \end{document}
+\end{document}

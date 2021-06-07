@@ -1,4 +1,3 @@
-
 **Notebook Outline:**  
   
 - [Setup with libraries](#Set-up-Cells)
@@ -120,7 +119,7 @@ selector.search(verbose=True,max_iter_multi=50)
     Bandwidths: 519.0, 624.0, 624.0
     Current iteration: 8 ,SOC: 9e-06
     Bandwidths: 519.0, 624.0, 624.0
-    
+
 
 
 
@@ -139,7 +138,7 @@ mgwr_mod = MGWR(coords, y, X, selector,family=Binomial()).fit()
 
 
     
-    
+
 
 
 ```python
@@ -235,7 +234,9 @@ plt.yticks([])
 
 
 
+    
 ![png](Simulated_data_example_Binomial-MGWR_files/Simulated_data_example_Binomial-MGWR_23_1.png)
+    
 
 
 
@@ -255,7 +256,9 @@ plt.yticks([])
 
 
 
+    
 ![png](Simulated_data_example_Binomial-MGWR_files/Simulated_data_example_Binomial-MGWR_24_1.png)
+    
 
 
 
@@ -277,7 +280,9 @@ plt.tight_layout()
 ```
 
 
+    
 ![png](Simulated_data_example_Binomial-MGWR_files/Simulated_data_example_Binomial-MGWR_26_0.png)
+    
 
 
 
@@ -293,7 +298,9 @@ sns.distplot(B2)
 
 
 
+    
 ![png](Simulated_data_example_Binomial-MGWR_files/Simulated_data_example_Binomial-MGWR_27_1.png)
+    
 
 
 
@@ -398,7 +405,9 @@ sns.distplot(y_exp)
 
 
 
+    
 ![png](Simulated_data_example_Binomial-MGWR_files/Simulated_data_example_Binomial-MGWR_40_1.png)
+    
 
 
 
@@ -419,7 +428,9 @@ pd.Series(y_exp.reshape(-1), index=x1).plot(style='.')
 
 
 
+    
 ![png](Simulated_data_example_Binomial-MGWR_files/Simulated_data_example_Binomial-MGWR_42_1.png)
+    
 
 
 
@@ -435,7 +446,9 @@ pd.Series(y.reshape(-1), index=x1).plot(style='.')
 
 
 
+    
 ![png](Simulated_data_example_Binomial-MGWR_files/Simulated_data_example_Binomial-MGWR_43_1.png)
+    
 
 
 
@@ -506,7 +519,7 @@ selector.search(verbose=True)
     Bandwidths: 622.0, 181.0, 188.0
     Current iteration: 10 ,SOC: 9.5e-06
     Bandwidths: 622.0, 181.0, 188.0
-    
+
 
 
 
@@ -525,7 +538,7 @@ mgwr_model=MGWR(coords,y,X,selector,family=Binomial()).fit()
 
 
     
-    
+
 
 #### Parameters check
 

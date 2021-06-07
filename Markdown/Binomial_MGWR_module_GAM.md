@@ -1,5 +1,3 @@
-
-
 ```python
 import sys
 sys.path.append("/Users/msachde1/Downloads/Research/Development/mgwr/")
@@ -137,7 +135,7 @@ while diff> tol and n_iter < max_iter:
 
     (239, 1)
     [43.]
-    
+
 
 
     HBox(children=(IntProgress(value=0, description='Inference', max=1), HTML(value='')))
@@ -147,7 +145,7 @@ while diff> tol and n_iter < max_iter:
     diff = 0.026595634232452814
     (239, 1)
     [43.]
-    
+
 
 
     HBox(children=(IntProgress(value=0, description='Inference', max=1), HTML(value='')))
@@ -157,7 +155,7 @@ while diff> tol and n_iter < max_iter:
     diff = 0.0004412778302481657
     (239, 1)
     [43.]
-    
+
 
 
     HBox(children=(IntProgress(value=0, description='Inference', max=1), HTML(value='')))
@@ -167,7 +165,7 @@ while diff> tol and n_iter < max_iter:
     diff = 0.0006897708549534753
     (239, 1)
     [43.]
-    
+
 
 
     HBox(children=(IntProgress(value=0, description='Inference', max=1), HTML(value='')))
@@ -177,7 +175,7 @@ while diff> tol and n_iter < max_iter:
     diff = 4.9275951381710925e-05
     (239, 1)
     [43.]
-    
+
 
 
     HBox(children=(IntProgress(value=0, description='Inference', max=1), HTML(value='')))
@@ -187,7 +185,7 @@ while diff> tol and n_iter < max_iter:
     diff = 0.00012256812688138385
     (239, 1)
     [43.]
-    
+
 
 
     HBox(children=(IntProgress(value=0, description='Inference', max=1), HTML(value='')))
@@ -197,7 +195,7 @@ while diff> tol and n_iter < max_iter:
     diff = 2.9542772679969076e-05
     (239, 1)
     [43.]
-    
+
 
 
     HBox(children=(IntProgress(value=0, description='Inference', max=1), HTML(value='')))
@@ -207,7 +205,7 @@ while diff> tol and n_iter < max_iter:
     diff = 1.126605167245387e-05
     (239, 1)
     [43.]
-    
+
 
 
     HBox(children=(IntProgress(value=0, description='Inference', max=1), HTML(value='')))
@@ -217,7 +215,7 @@ while diff> tol and n_iter < max_iter:
     diff = 3.6961727373385767e-05
     (239, 1)
     [43.]
-    
+
 
 
     HBox(children=(IntProgress(value=0, description='Inference', max=1), HTML(value='')))
@@ -227,7 +225,7 @@ while diff> tol and n_iter < max_iter:
     diff = 2.606459520659854e-06
     (239, 1)
     [43.]
-    
+
 
 
     HBox(children=(IntProgress(value=0, description='Inference', max=1), HTML(value='')))
@@ -237,7 +235,7 @@ while diff> tol and n_iter < max_iter:
     diff = 1.125952122371654e-06
     (239, 1)
     [43.]
-    
+
 
 
     HBox(children=(IntProgress(value=0, description='Inference', max=1), HTML(value='')))
@@ -245,7 +243,7 @@ while diff> tol and n_iter < max_iter:
 
     
     diff = 4.6469079716116024e-08
-    
+
 
 
 ```python
@@ -299,7 +297,9 @@ sns.distplot(z)
 
 
 
+    
 ![png](Binomial_MGWR_module_GAM_files/Binomial_MGWR_module_GAM_19_1.png)
+    
 
 
 
@@ -315,7 +315,9 @@ sns.distplot(x_std)
 
 
 
+    
 ![png](Binomial_MGWR_module_GAM_files/Binomial_MGWR_module_GAM_20_1.png)
+    
 
 
 

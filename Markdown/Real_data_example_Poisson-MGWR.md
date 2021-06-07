@@ -1,4 +1,3 @@
-
 **Notebook Outline:**  
   
 - [Setup with libraries](#Set-up-Cells)
@@ -91,7 +90,9 @@ sns.distplot(y)
 
 
 
+    
 ![png](Real_data_example_Poisson-MGWR_files/Real_data_example_Poisson-MGWR_8_1.png)
+    
 
 
 ### Univariate example
@@ -129,7 +130,7 @@ selector.search(verbose=True)
 
     Current iteration: 1 ,SOC: 0.0
     Bandwidths: 43.0
-    
+
 
 
 
@@ -148,7 +149,7 @@ mgwr_model=MGWR(coords,y,x_std,selector,family=Poisson(),offset=off,constant=Fal
 
 
     
-    
+
 
 #### Bandwidth: Random initialization check
 
@@ -258,7 +259,7 @@ selector.search(verbose=True)
     Bandwidths: 261.0, 65.0, 261.0, 95.0, 44.0
     Current iteration: 10 ,SOC: 9.2e-06
     Bandwidths: 261.0, 65.0, 261.0, 95.0, 44.0
-    
+
 
 
 
@@ -284,7 +285,7 @@ mgwr_model=MGWR(coords,y,X_std,selector,family=Poisson(),offset=off).fit()
 
 
     
-    
+
 
 ### AIC, AICc, BIC check
 

@@ -1,4 +1,3 @@
-
 # <center>Regression Models - The why and the how </center>
 
 **Notebook Outline:**  

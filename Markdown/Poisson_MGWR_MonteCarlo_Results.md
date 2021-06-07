@@ -1,4 +1,3 @@
-
 **Notebook Outline:**  
   
 - [Setup with libraries](#Set-up-Cell)
@@ -31,7 +30,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
     C:\Users\msachde1\AppData\Local\Continuum\anaconda3\envs\gwrenv\lib\site-packages\libpysal\io\iohandlers\__init__.py:25: UserWarning: SQLAlchemy and Geomet not installed, database I/O disabled
       warnings.warn('SQLAlchemy and Geomet not installed, database I/O disabled')
-    
+
 
 ### List bandwidths from pickles
 
@@ -152,7 +151,9 @@ sns.distplot(gwr_bw)
 
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_15_1.png)
+    
 
 
 
@@ -186,7 +187,9 @@ plt.yticks([])
 
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_18_1.png)
+    
 
 
 
@@ -202,7 +205,9 @@ sns.distplot(mgwr_bw0)
 
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_19_1.png)
+    
 
 
 
@@ -234,7 +239,9 @@ plt.yticks([])
 
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_21_1.png)
+    
 
 
 
@@ -262,7 +269,9 @@ sns.distplot(mgwr_bw1)
 
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_23_1.png)
+    
 
 
 
@@ -282,7 +291,9 @@ plt.yticks([])
 
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_24_1.png)
+    
 
 
 
@@ -310,7 +321,9 @@ sns.distplot(mgwr_bw2)
 
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_26_1.png)
+    
 
 
 
@@ -375,7 +388,9 @@ sns.distplot(np.mean(gwr_predy,axis=0))
 
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_31_1.png)
+    
 
 
 
@@ -391,7 +406,9 @@ sns.distplot(np.mean(mgwr_predy,axis=0))
 
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_32_1.png)
+    
 
 
 
@@ -407,7 +424,9 @@ sns.distplot(y)
 
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_33_1.png)
+    
 
 
 
@@ -422,7 +441,9 @@ plt.tight_layout()
 ```
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_34_0.png)
+    
 
 
 
@@ -437,7 +458,9 @@ plt.tight_layout()
 ```
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_35_0.png)
+    
 
 
 
@@ -452,7 +475,9 @@ plt.tight_layout()
 ```
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_36_0.png)
+    
 
 
 
@@ -539,7 +564,9 @@ ax = sns.boxplot(y=df['aic'],x=df['model'])
 ```
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_47_0.png)
+    
 
 
 
@@ -549,7 +576,9 @@ ax = sns.boxplot(y=df['aicc'],x=df['model'])
 ```
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_48_0.png)
+    
 
 
 
@@ -559,7 +588,9 @@ ax = sns.boxplot(y=df['bic'],x=df['model'])
 ```
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_49_0.png)
+    
 
 
 ### Parameter comparison from MGWR and GWR
@@ -645,7 +676,9 @@ plt.tight_layout()
 ```
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_57_0.png)
+    
 
 
 
@@ -677,7 +710,9 @@ plt.tight_layout()
 ```
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_58_0.png)
+    
 
 
 
@@ -709,7 +744,9 @@ plt.tight_layout()
 ```
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_59_0.png)
+    
 
 
 ### Comparing parameters (MGWR and GWR)
@@ -769,7 +806,9 @@ ax = sns.boxplot(y=df['rmse_b0'],x=df['model'])
 ```
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_68_0.png)
+    
 
 
 ### $B_1$
@@ -807,7 +846,9 @@ ax = sns.boxplot(x=df['model'],y=df['rmse_b1'])
 ```
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_73_0.png)
+    
 
 
 
@@ -866,7 +907,9 @@ ax = sns.boxplot(y=df['rmse_b2'],x=df['model'])
 ```
 
 
+    
 ![png](Poisson_MGWR_MonteCarlo_Results_files/Poisson_MGWR_MonteCarlo_Results_79_0.png)
+    
 
 
 

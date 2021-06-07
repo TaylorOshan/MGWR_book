@@ -1,4 +1,3 @@
-
 # <center> Generalized Modeling and Predictions in Multiscale Geographically Weighted Regression <center>
 
 ***
